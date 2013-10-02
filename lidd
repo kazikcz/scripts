@@ -1,0 +1,18 @@
+#!/bin/sh
+main() {
+	lsinput \
+		| awk '/^\// {dev=$1} $1 == "name" && /Lid Switch/ {print dev}' \
+		| xargs evtest \
+		| awk '
+			/EV_SW/ && /SW_LID/ && /value 1/ {
+				print "/usr/local/sbin/suspend";
+				fflush()
+			}' \
+		| xargs -n1 sh
+}
+
+while true
+do
+	main
+	sleep 5
+done </dev/null >/dev/null 2>/dev/null &
