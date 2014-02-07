@@ -1,9 +1,16 @@
 #!/bin/sh
+die() { echo $@; exit 1; }
+check() { which $1 >/dev/null || die $1 missing; }
+
+check lsinput
+check evtest
+check gawk
+
 main() {
 	lsinput \
-		| awk '/^\// {dev=$1} $1 == "name" && /Lid Switch/ {print dev}' \
+		| gawk '/^\// {dev=$1} $1 == "name" && /Lid Switch/ {print dev}' \
 		| xargs evtest \
-		| awk '
+		| gawk '
 			/EV_SW/ && /SW_LID/ && /value 1/ {
 				print "/usr/local/sbin/suspend";
 				fflush()
